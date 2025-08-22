@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Científica Avanzada</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .calculator-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .calculator-header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .calculator-title {
+            font-family: 'Orbitron', monospace;
+            color: #00ff88;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        
+        .calculator-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        .display-container {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .display {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: right;
+            min-height: 120px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+        }
+        
+        .result {
+            font-family: 'Orbitron', monospace;
+            color: #ffffff;
+            font-size: 2.5rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+        
+        .expression {
+            font-family: 'Inter', sans-serif;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1rem;
+            min-height: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .memory-display {
+            font-family: 'Inter', sans-serif;
+            color: rgba(0, 255, 136, 0.8);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            min-height: 18px;
+        }
+        
+        .keypad {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+        }
+        
+        .btn {
+            border: none;
+            border-radius: 12px;
+            padding: 15px 5px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-number {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-operator {
+            background: rgba(255, 170, 0, 0.3);
+            color: #ffaa00;
+        }
+        
+        .btn-function {
+            background: rgba(0, 150, 255, 0.3);
+            color: #0096ff;
+            font-size: 0.95rem;
+        }
+        
+        .btn-scientific {
+            background: rgba(153, 50, 204, 0.3);
+            color: #9932cc;
+            font-size: 0.9rem;
+        }
+        
+        .btn-memory {
+            background: rgba(0, 255, 136, 0.3);
+            color: #00ff88;
+            font-size: 0.85rem;
+        }
+        
+        .btn-clear {
+            background: rgba(255, 69, 58, 0.3);
+            color: #ff453a;
+        }
+        
+        .btn-equals {
+            background: linear-gradient(135deg, #00ff88, #00ccff);
+            color: white;
+            grid-column: span 2;
+            font-weight: 600;
+        }
+        
+        .btn-zero {
+            grid-column: span 2;
+        }
+        
+        .mode-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 10px 20px;
+            margin: 10px 20px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .mode-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+        
+        .android-mode {
+            background: linear-gradient(135deg, #34c759, #32cd32);
+        }
+        
+        @media (max-width: 480px) {
+            .keypad {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 10px;
+                padding: 15px;
+            }
+            
+            .btn {
+                padding: 12px 5px;
+                font-size: 1rem;
+                border-radius: 10px;
+            }
+            
+            .result {
+                font-size: 2rem;
+            }
+            
+            .calculator-title {
+                font-size: 1.3rem;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .keypad {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+                padding: 12px;
+            }
+            
+            .btn {
+                padding: 10px 3px;
+                font-size: 0.9rem;
+                border-radius: 8px;
+            }
+            
+            .result {
+                font-size: 1.8rem;
+            }
+        }
+        
+        .android-layout {
+            background: linear-gradient(135deg, #303030, #1a1a1a);
+        }
+        
+        .android-layout .btn {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50px;
+            font-weight: 400;
+        }
+        
+        .android-layout .btn-number {
+            background: rgba(255, 255, 255, 0.12);
+        }
+        
+        .android-layout .btn-operator {
+            background: rgba(76, 175, 80, 0.25);
+        }
+        
+        .android-layout .btn-equals {
+            background: linear-gradient(135deg, #4caf50, #45a049);
+        }
+        
+        .android-layout .display {
+            background: rgba(0, 0, 0, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container" id="calculator">
+        <div class="calculator-header">
+            <h1 class="calculator-title">CALCULADORA CIENTÍFICA</h1>
+            <p class="calculator-subtitle">Calculadora avanzada con funciones científicas</p>
+        </div>
+        
+        <div class="display-container">
+            <div class="memory-display" id="memory-display"></div>
+            <div class="expression" id="expression"></div>
+            <div class="display">
+                <div class="result" id="result">0</div>
+            </div>
+        </div>
+        
+        <div class="mode-toggle" id="mode-toggle">
+            <span class="mode-text">Modo: Escritorio | Toca para cambiar a Android</span>
+        </div>
+        
+        <div class="keypad">
+            <!-- Primera fila - Funciones de memoria y limpieza -->
+            <button class="btn btn-memory" onclick="memoryAdd()">M+</button>
+            <button class="btn btn-memory" onclick="memorySubtract()">M-</button>
+            <button class="btn btn-memory" onclick="memoryRecall()">MR</button>
+            <button class="btn btn-memory" onclick="memoryClear()">MC</button>
+            <button class="btn btn-clear" onclick="clearAll()">AC</button>
+            
+            <!-- Segunda fila - Funciones científicas 1 -->
+            <button class="btn btn-scientific" onclick="addToExpression('sin(')">sin</button>
+            <button class="btn btn-scientific" onclick="addToExpression('cos(')">cos</button>
+            <button class="btn btn-scientific" onclick="addToExpression('tan(')">tan</button>
+            <button class="btn btn-scientific" onclick="addToExpression('π')">π</button>
+            <button class="btn btn-scientific" onclick="addToExpression('e')">e</button>
+            
+            <!-- Tercera fila - Funciones científicas 2 -->
+            <button class="btn btn-scientific" onclick="addToExpression('log(')">log</button>
+            <button class="btn btn-scientific" onclick="addToExpression('ln(')">ln</button>
+            <button class="btn btn-scientific" onclick="addToExpression('^')">x^y</button>
+            <button class="btn btn-scientific" onclick="addToExpression('√(')">√</button>
+            <button class="btn btn-scientific" onclick="factorial()">x!</button>
+            
+            <!-- Cuarta fila - Números y operadores básicos -->
+            <button class="btn btn-function" onclick="addToExpression('(')">(</button>
+            <button class="btn btn-function" onclick="addToExpression(')')">)</button>
+            <button class="btn btn-function" onclick="backspace()">⌫</button>
+            <button class="btn btn-operator" onclick="addToExpression('/')">/</button>
+            <button class="btn btn-scientific" onclick="percentage()">%</button>
+            
+            <!-- Quinta fila - Números -->
+            <button class="btn btn-number" onclick="addToExpression('7')">7</button>
+            <button class="btn btn-number" onclick="addToExpression('8')">8</button>
+            <button class="btn btn-number" onclick="addToExpression('9')">9</button>
+            <button class="btn btn-operator" onclick="addToExpression('*')">×</button>
+            <button class="btn btn-scientific" onclick="addToExpression('^2')">x²</button>
+            
+            <!-- Sexta fila - Números -->
+            <button class="btn btn-number" onclick="addToExpression('4')">4</button>
+            <button class="btn btn-number" onclick="addToExpression('5')">5</button>
+            <button class="btn btn-number" onclick="addToExpression('6')">6</button>
+            <button class="btn btn-operator" onclick="addToExpression('-')">−</button>
+            <button class="btn btn-scientific" onclick="addToExpression('1/')">1/x</button>
+            
+            <!-- Séptima fila - Números -->
+            <button class="btn btn-number" onclick="addToExpression('1')">1</button>
+            <button class="btn btn-number" onclick="addToExpression('2')">2</button>
+            <button class="btn btn-number" onclick="addToExpression('3')">3</button>
+            <button class="btn btn-operator" onclick="addToExpression('+')">+</button>
+            <button class="btn btn-scientific" onclick="toggleSign()">±</button>
+            
+            <!-- Octava fila - Cero, decimal e igual -->
+            <button class="btn btn-number btn-zero" onclick="addToExpression('0')">0</button>
+            <button class="btn btn-number" onclick="addToExpression('.')">.</button>
+            <button class="btn btn-equals" onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <script>
+        let currentExpression = '';
+        let memory = 0;
+        let isAndroidMode = false;
+        
+        const resultDisplay = document.getElementById('result');
+        const expressionDisplay = document.getElementById('expression');
+        const memoryDisplay = document.getElementById('memory-display');
+        const calculator = document.getElementById('calculator');
+        const modeToggle = document.getElementById('mode-toggle');
+        const modeText = document.querySelector('.mode-text');
+        
+        function updateDisplay() {
+            resultDisplay.textContent = currentExpression || '0';
+            memoryDisplay.textContent = memory !== 0 ? `M: ${memory}` : '';
+        }
+        
+        function addToExpression(value) {
+            if (currentExpression === 'Error' || currentExpression === 'Infinity' || currentExpression === 'NaN') {
+                currentExpression = '';
+            }
+            
+            currentExpression += value;
+            updateDisplay();
+        }
+        
+        function clearAll() {
+            currentExpression = '';
+            updateDisplay();
+        }
+        
+        function backspace() {
+            currentExpression = currentExpression.slice(0, -1);
+            updateDisplay();
+        }
+        
+        function calculate() {
+            try {
+                let expression = currentExpression
+                    .replace(/π/g, Math.PI)
+                    .replace(/e/g, Math.E)
+                    .replace(/\^2/g, '**2')
+                    .replace(/\^/g, '**')
+                    .replace(/√\(/g, 'Math.sqrt(')
+                    .replace(/sin\(/g, 'Math.sin(')
+                    .replace(/cos\(/g, 'Math.cos(')
+                    .replace(/tan\(/g, 'Math.tan(')
+                    .replace(/log\(/g, 'Math.log10(')
+                    .replace(/ln\(/g, 'Math.log(')
+                    .replace(/1\//g, '1/');
+                
+                // Guardar la expresión original para mostrarla
+                expressionDisplay.textContent = currentExpression + ' =';
+                
+                // Evaluar la expresión
+                const result = eval(expression);
+                
+                if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
+                    currentExpression = parseFloat(result.toFixed(10)).toString();
+                } else {
+                    currentExpression = 'Error';
+                }
+                
+                updateDisplay();
+            } catch (error) {
+                currentExpression = 'Error';
+                updateDisplay();
+            }
+        }
+        
+        function toggleSign() {
+            if (currentExpression) {
+                if (currentExpression.startsWith('-')) {
+                    currentExpression = currentExpression.substring(1);
+                } else {
+                    currentExpression = '-' + currentExpression;
+                }
+                updateDisplay();
+            }
+        }
+        
+        function percentage() {
+            try {
+                const value = parseFloat(currentExpression);
+                if (!isNaN(value)) {
+                    currentExpression = (value / 100).toString();
+                    updateDisplay();
+                }
+            } catch (error) {
+                currentExpression = 'Error';
+                updateDisplay();
+            }
+        }
+        
+        function factorial() {
+            try {
+                const num = parseInt(currentExpression);
+                if (num >= 0 && !isNaN(num)) {
+                    let result = 1;
+                    for (let i = 2; i <= num; i++) {
+                        result *= i;
+                    }
+                    currentExpression = result.toString();
+                    updateDisplay();
+                }
+            } catch (error) {
+                currentExpression = 'Error';
+                updateDisplay();
+            }
+        }
+        
+        function memoryAdd() {
+            try {
+                const value = parseFloat(currentExpression);
+                if (!isNaN(value)) {
+                    memory += value;
+                    memoryDisplay.textContent = `M: ${memory}`;
+                }
+            } catch (error) {
+                // Ignorar errores en memoria
+            }
+        }
+        
+        function memorySubtract() {
+            try {
+                const value = parseFloat(currentExpression);
+                if (!isNaN(value)) {
+                    memory -= value;
+                    memoryDisplay.textContent = `M: ${memory}`;
+                }
+            } catch (error) {
+                // Ignorar errores en memoria
+            }
+        }
+        
+        function memoryRecall() {
+            currentExpression = memory.toString();
+            updateDisplay();
+        }
+        
+        function memoryClear() {
+            memory = 0;
+            memoryDisplay.textContent = '';
+        }
+        
+        // Toggle entre modo escritorio y Android
+        modeToggle.addEventListener('click', function() {
+            isAndroidMode = !isAndroidMode;
+            
+            if (isAndroidMode) {
+                calculator.classList.add('android-layout');
+                modeText.textContent = 'Modo: Android | Toca para cambiar a Escritorio';
+                modeToggle.classList.add('android-mode');
+            } else {
+                calculator.classList.remove('android-layout');
+                modeText.textContent = 'Modo: Escritorio | Toca para cambiar a Android';
+                modeToggle.classList.remove('android-mode');
+            }
+        });
+        
+        // Soporte para teclado
+        document.addEventListener('keydown', function(event) {
+            const key = event.key;
+            
+            if (/[0-9]/.test(key)) {
+                addToExpression(key);
+            } else if (key === '+') {
+                addToExpression('+');
+            } else if (key === '-') {
+                addToExpression('-');
+            } else if (key === '*') {
+                addToExpression('*');
+            } else if (key === '/') {
+                addToExpression('/');
+            } else if (key === '.') {
+                addToExpression('.');
+            } else if (key === 'Enter' || key === '=') {
+                calculate();
+            } else if (key === 'Escape' || key === 'Delete') {
+                clearAll();
+            } else if (key === 'Backspace') {
+                backspace();
+            } else if (key === '(') {
+                addToExpression('(');
+            } else if (key === ')') {
+                addToExpression(')');
+            }
+        });
+        
+        // Inicializar display
+        updateDisplay();
+    </script>
+</body>
+</html>
+
